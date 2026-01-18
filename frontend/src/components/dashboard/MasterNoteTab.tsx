@@ -11,6 +11,7 @@ export default function MasterNoteTab() {
   const [selectedNoteIds, setSelectedNoteIds] = useState<number[]>([]);
   const [masterNote, setMasterNote] = useState<any>(null);
   const [latestMaster, setLatestMaster] = useState<any>(null);
+  const [latestMasterNotFound, setLatestMasterNotFound] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [consensusLoading, setConsensusLoading] = useState(false);
@@ -33,6 +34,13 @@ export default function MasterNoteTab() {
           headers: { Authorization: `Bearer ${token}` }
         });
         console.debug('[MasterNote] response status', res.status);
+        if (res.status === 204) {
+          console.debug('[MasterNote] no master notes (204)');
+          setLatestMaster(null);
+          setLatestMasterNotFound(true);
+          return;
+        }
+        setLatestMasterNotFound(false);
         if (!res.ok) return;
         const data = await res.json();
         console.debug('[MasterNote] latest master', data);
@@ -159,8 +167,14 @@ export default function MasterNoteTab() {
         document.body.appendChild(a);
         a.click();
         a.remove();
+      } else if (res.status === 503) {
+        const data = await res.json().catch(() => null);
+        alert(data?.detail || 'PDF generation not available on the server (reportlab missing)');
+      } else if (res.status === 404) {
+        alert('No Master Note found to download');
       } else {
-        alert('Failed to download PDF');
+        const txt = await res.text().catch(() => null);
+        alert('Failed to download PDF: ' + (txt || res.status));
       }
     } catch (e) {
       alert('Error downloading PDF');

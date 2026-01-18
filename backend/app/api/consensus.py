@@ -166,7 +166,8 @@ async def get_latest_master_note(
     ).order_by(MasterNote.created_at.desc()).first()
     
     if not master:
-        raise HTTPException(status_code=404, detail="No Master Note found")
+        # Return 204 No Content to indicate there is no Master Note yet (not an error)
+        return Response(status_code=204)
     return master
 
 @router.get("/master/{subject_id}/{chapter}")

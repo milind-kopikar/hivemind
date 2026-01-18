@@ -62,7 +62,10 @@ export default function TestPrepTab() {
         const res = await fetch(`${API_BASE_URL}/consensus/master/latest`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (res.ok) {
+        console.debug('[TestPrep] checkActiveNote status', res.status);
+        if (res.status === 204) {
+            setActiveNoteInfo("No specific study guide selected. I'll use my general knowledge!");
+        } else if (res.ok) {
             const data = await res.json();
             setActiveNoteInfo(`Using context from: ${data.topic}`);
         } else {
