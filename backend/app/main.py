@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+import os
 from .database import engine, Base
 from .api import auth, ingestion, consensus, rag, analytics
 from .api import subjects, notes
