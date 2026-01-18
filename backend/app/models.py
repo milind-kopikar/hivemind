@@ -3,7 +3,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 # Note: pgvector is optional for local testing - use JSON fallback for embeddings until pgvector is installed
-from pgvector.sqlalchemy import Vector
+try:
+    from pgvector.sqlalchemy import Vector  # type: ignore
+except Exception:
+    Vector = None  # pgvector is optional; embeddings use JSON fallback when not available
+
 from .database import Base
 
 class User(Base):
