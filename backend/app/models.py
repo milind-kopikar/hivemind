@@ -2,11 +2,8 @@ from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Floa
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
-# Note: pgvector is optional for local testing - use JSON fallback for embeddings until pgvector is installed
-try:
-    from pgvector.sqlalchemy import Vector  # type: ignore
-except Exception:
-    Vector = None  # pgvector is optional; embeddings use JSON fallback when not available
+# pgvector is intentionally not required in production; use JSON fallback for embeddings
+Vector = None
 
 from .database import Base
 
