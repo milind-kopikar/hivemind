@@ -102,11 +102,6 @@ async def run_consensus_v2(
 
 from fastapi.responses import JSONResponse, Response
 from io import BytesIO
-from reportlab.lib.pagesizes import LETTER
-from reportlab.pdfgen import canvas
-from reportlab.lib import colors
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
 
 @router.get("/master/{subject_id}/{chapter}/pdf")
 async def download_master_pdf(
@@ -127,26 +122,34 @@ async def download_master_pdf(
     if not master:
         raise HTTPException(status_code=404, detail="Master Note not found")
     
+    # Import reportlab lazily so the app can run without it installed
+    try:
+        from reportlab.lib.pagesizes import LETTER
+        from reportlab.lib.styles import getSampleStyleSheet
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+    except Exception:
+        return JSONResponse(status_code=503, content={"detail": "PDF generation not available - install 'reportlab' to enable this endpoint."})
+
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=LETTER)
     styles = getSampleStyleSheet()
-    
+
     elements = []
     elements.append(Paragraph(f"Master Note: {master.topic}", styles['Title']))
     elements.append(Spacer(1, 12))
     elements.append(Paragraph(f"Version: {master.version} | Date: {master.created_at.strftime('%Y-%m-%d')}", styles['Normal']))
     elements.append(Spacer(1, 24))
-    
+
     # Process content paragraphs
     for p in master.content.split('\n'):
         if p.strip():
             elements.append(Paragraph(p, styles['Normal']))
             elements.append(Spacer(1, 6))
-            
+
     doc.build(elements)
     pdf_value = buffer.getvalue()
     buffer.close()
-    
+
     filename = f"MasterNote_{subject_id}_Ch{chapter}.pdf"
     return Response(content=pdf_value, media_type="application/pdf", headers={"Content-Disposition": f"attachment; filename={filename}"})
 
