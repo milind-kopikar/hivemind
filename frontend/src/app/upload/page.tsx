@@ -30,6 +30,7 @@ export default function UploadPage() {
   const [newSubject, setNewSubject] = useState('');
   const [subjectId, setSubjectId] = useState<number | null>(null);
   const [chapter, setChapter] = useState<number | undefined>(undefined);
+  const [teacher, setTeacher] = useState<string>('');
 
   React.useEffect(() => {
     fetch(`${API_BASE_URL}/subjects/`)
@@ -67,7 +68,7 @@ export default function UploadPage() {
     console.log('Submitting, current file state:', file);
     if (!file) return setError('Please select a file');
     if (!subjectId) return setError('Please select or create a subject');
-    if (!chapter) return setError('Please specify a chapter');
+    if (!chapter) return setError('Please specify a chapter');      if (!teacher) return setError("Please enter the teacher's name for this lecture");    if (!teacher) return setError('Please enter the teacher\'s name for this lecture');
     
     const token = localStorage.getItem('token');
     if (!token) return setError('Please login first');
@@ -78,6 +79,7 @@ export default function UploadPage() {
       fd.append('file', file);
       fd.append('subject_id', String(subjectId));
       if (chapter) fd.append('chapter', String(chapter));
+      fd.append('teacher', String(teacher));
       const res = await fetch(`${API_BASE_URL}/ingestion/upload`, {
         method: 'POST',
         headers: {
@@ -163,6 +165,11 @@ export default function UploadPage() {
         <div className="mb-3">
           <label className="block text-sm font-medium text-gray-700 mb-1">Chapter (required)</label>
           <input type="number" required className="px-3 py-2 border rounded" value={chapter ?? ''} onChange={(e)=>setChapter(e.target.value ? Number(e.target.value) : undefined)} />
+        </div>
+
+        <div className="mb-3">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Teacher (name of the lecture's teacher)</label>
+          <input type="text" required className="px-3 py-2 border rounded" value={teacher} onChange={(e)=>setTeacher(e.target.value)} />
         </div>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}

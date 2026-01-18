@@ -33,6 +33,7 @@ class Note(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     # Use JSON for local testing. Replace with Vector(768) when pgvector is available.
     embedding = Column(JSON, nullable=True)
+    teacher = Column(String, nullable=True)  # teacher for this specific note (lecture)
 
     owner = relationship("User", back_populates="notes")
     subject = relationship("Subject", back_populates="notes")

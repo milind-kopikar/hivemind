@@ -16,6 +16,7 @@ async def upload_note(
     file: UploadFile = File(...), 
     subject_id: int = Form(...),
     chapter: int = Form(...),
+    teacher: str = Form(...),
     db: Session = Depends(get_db),
     current_user: dict = Depends(get_current_user)
 ):
@@ -60,7 +61,8 @@ async def upload_note(
             content=extracted_content,
             user_id=uid,
             subject_id=subject_id,
-            chapter=chapter
+            chapter=chapter,
+            teacher=teacher
         )
         db.add(new_note)
         db.commit()
