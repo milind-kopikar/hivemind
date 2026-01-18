@@ -52,14 +52,21 @@ async def upload_note(
             extracted_content = await extract_text_from_image(content)
 
         # Save to DB
-        # Find numeric user_id if current_user["sub"] is email
         from ..models import User
-        db_user = db.query(User).filter(User.email == user_id).first()
-        uid = db_user.id if db_user else 1
+        # Prefer numeric user_id from token payload, fall back to email lookup
+        token_user_id = current_user.get('user_id') if isinstance(current_user, dict) else None
+        token_user_email = current_user.get('sub') if isinstance(current_user, dict) else None
+        db_user = None
+        if token_user_id:
+            db_user = db.query(User).filter(User.id == token_user_id).first()
+        if not db_user and token_user_email:
+            db_user = db.query(User).filter(User.email == token_user_email).first()
+        if not db_user:
+            return JSONResponse(status_code=401, content={"detail": "Authenticated user not found in database"})
 
         new_note = Note(
             content=extracted_content,
-            user_id=uid,
+            user_id=db_user.id,
             subject_id=subject_id,
             chapter=chapter,
             teacher=teacher
