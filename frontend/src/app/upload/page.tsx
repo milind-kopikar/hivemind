@@ -8,6 +8,7 @@ export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
@@ -92,6 +93,11 @@ export default function UploadPage() {
         setError(data.detail || 'Upload failed');
       } else {
         setResult(data);
+        setError('');
+        // show success message and clear selected file
+        setFile(null);
+        setFilePreview(null);
+        setSuccess('Upload successful');
       }
     } catch (err) {
       setError('Network error');
@@ -173,6 +179,7 @@ export default function UploadPage() {
         </div>
 
         {error && <p className="text-red-500 text-sm">{error}</p>}
+        {success && <p className="text-green-600 text-sm">{success}</p>}
         <Button type="submit" fullWidth disabled={loading} className="mt-2">
           {loading ? 'Uploading...' : 'Upload'}
         </Button>
