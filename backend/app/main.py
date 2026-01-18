@@ -61,8 +61,6 @@ app.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 app.include_router(subjects.router, prefix="/subjects", tags=["subjects"])
 app.include_router(notes.router, prefix="/notes", tags=["notes"])
 app.include_router(ai.router, prefix="/ai", tags=["ai"])  # /ai/health for AI status
-from .api import admin  # temporary admin utilities
-app.include_router(admin.router, prefix='/admin', tags=['admin'])
 
 # Simple protected endpoint to verify tokens
 from .core.security import decode_access_token
