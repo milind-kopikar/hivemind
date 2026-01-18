@@ -6,7 +6,6 @@ pydantic
 pydantic-ai
 google-generativeai
 python-dotenv
-pgvector
 alembic
 passlib[bcrypt]
 python-jose[cryptography]

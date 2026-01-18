@@ -19,15 +19,8 @@ if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
 
 engine = create_engine(DATABASE_URL)
 
-# Try to enable pgvector extension if we are on PostgreSQL
-if "postgresql" in DATABASE_URL:
-    try:
-        from sqlalchemy import text
-        with engine.connect() as conn:
-            conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector;"))
-            conn.commit()
-    except Exception as e:
-        print(f"Note: Could not ensure 'vector' extension: {e}")
+# pgvector is not required; skip attempting to create PostgreSQL extensions to
+# avoid platform-specific failures when running with plain PostgreSQL.
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
