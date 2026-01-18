@@ -24,17 +24,35 @@ export default function MasterNoteTab() {
     // Also fetch the user's most recent master note so we can offer a quick link
     async function loadLatestMaster() {
       try {
-        const res = await fetch(`${API_BASE_URL}/consensus/master/latest`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        const token = localStorage.getItem('token');
+        console.debug('[MasterNote] loadLatestMaster token:', !!token);
+        if (!token) return; // skip fetching latest master for unauthenticated users
+        const url = `${API_BASE_URL}/consensus/master/latest`;
+        console.debug('[MasterNote] fetch', url);
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` }
         });
+        console.debug('[MasterNote] response status', res.status);
         if (!res.ok) return;
         const data = await res.json();
+        console.debug('[MasterNote] latest master', data);
         setLatestMaster(data);
       } catch (e) {
-        // ignore
+        console.error('[MasterNote] loadLatestMaster error', e);
       }
     }
     loadLatestMaster();
+
+    // Also fetch AI health for debugging
+    (async function fetchAIHealth(){
+      try {
+        const res = await fetch(`${API_BASE_URL}/ai/health`);
+        const data = await res.json();
+        console.debug('[MasterNote] AI health', data);
+      } catch (e) {
+        console.debug('[MasterNote] AI health error', e);
+      }
+    })();
   }, []);
 
   async function fetchAllNotes() {

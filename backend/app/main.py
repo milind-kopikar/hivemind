@@ -4,6 +4,7 @@ import os
 from .database import engine, Base
 from .api import auth, ingestion, consensus, rag, analytics
 from .api import subjects, notes
+from .api import ai  # health check for AI integrations
 
 # Try to create tables (if pgvector isn't available, this should work with JSON fallback embeddings)
 try:
@@ -59,6 +60,7 @@ app.include_router(rag.router, prefix="/rag", tags=["rag"])
 app.include_router(analytics.router, prefix="/analytics", tags=["analytics"])
 app.include_router(subjects.router, prefix="/subjects", tags=["subjects"])
 app.include_router(notes.router, prefix="/notes", tags=["notes"])
+app.include_router(ai.router, prefix="/ai", tags=["ai"])  # /ai/health for AI status
 
 # Simple protected endpoint to verify tokens
 from .core.security import decode_access_token

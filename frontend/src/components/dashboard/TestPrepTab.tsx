@@ -19,26 +19,46 @@ export default function TestPrepTab() {
     }
     async function loadLatestQuiz() {
       try {
-        const res = await fetch(`${API_BASE_URL}/rag/quiz/latest`, {
-          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+        const token = localStorage.getItem('token');
+        console.debug('[TestPrep] loadLatestQuiz token:', !!token);
+        if (!token) { setCurrentQuiz(null); return; }
+        const url = `${API_BASE_URL}/rag/quiz/latest`;
+        console.debug('[TestPrep] fetch', url);
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` }
         });
+        console.debug('[TestPrep] response status', res.status);
         if (!res.ok) {
           setCurrentQuiz(null);
           return;
         }
         const q = await res.json();
+        console.debug('[TestPrep] quiz', q);
         setCurrentQuiz(q);
       } catch (e) {
+        console.error('[TestPrep] loadLatestQuiz error', e);
         setCurrentQuiz(null);
       }
     }
     loadLatestQuiz();
+
+    // Check AI health
+    (async function fetchAIHealth(){
+      try {
+        const res = await fetch(`${API_BASE_URL}/ai/health`);
+        const data = await res.json();
+        console.debug('[TestPrep] AI health', data);
+      } catch (e) {
+        console.debug('[TestPrep] AI health error', e);
+      }
+    })();
   }, [mode]);
   // Check if there is an active master note to use as context
   useEffect(() => {
     async function checkActiveNote() {
       try {
         const token = localStorage.getItem('token');
+        if (!token) { setActiveNoteInfo(null); return; }
         const res = await fetch(`${API_BASE_URL}/consensus/master/latest`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
