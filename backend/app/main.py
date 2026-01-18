@@ -14,6 +14,24 @@ except Exception as e:
 
 app = FastAPI(title="HiveMind API")
 
+# Small startup info and request logging to help Railway debugging
+import logging
+from starlette.requests import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+
+logging.basicConfig(level=logging.INFO)
+port = os.getenv("PORT", "8000")
+print(f"Starting HiveMind API on port {port}")
+
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        print(f"REQ {request.method} {request.url.path} headers={dict(request.headers)}")
+        response = await call_next(request)
+        print(f"RESP {request.method} {request.url.path} status={response.status_code}")
+        return response
+
+app.add_middleware(RequestLoggingMiddleware)
+
 # Configure CORS for mobile and web
 allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
 
@@ -28,6 +46,10 @@ app.add_middleware(
 @app.get("/")
 async def root():
     return {"message": "Welcome to HiveMind API"}
+
+@app.get("/health")
+async def health():
+    return {"status": "ok", "port": port}
 
 # Include routers
 app.include_router(auth.router, prefix="/auth", tags=["auth"])
