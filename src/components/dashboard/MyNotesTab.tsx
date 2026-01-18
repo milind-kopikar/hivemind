@@ -1,7 +1,8 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/shared/Button';
-import UploadPage from '@/app/upload/page'; // We can reuse the upload logic or make it a component
+import UploadPage from '@/app/upload/page';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function MyNotesTab() {
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -11,7 +12,7 @@ export default function MyNotesTab() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8000/subjects/')
+    fetch(`${API_BASE_URL}/subjects/`)
       .then(r => r.json())
       .then(setSubjects)
       .catch(() => setSubjects([]));
@@ -27,7 +28,7 @@ export default function MyNotesTab() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:8000/notes/my?subject_id=${subjectId}`, {
+      const res = await fetch(`${API_BASE_URL}/notes/my?subject_id=${subjectId}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       if (res.ok) {

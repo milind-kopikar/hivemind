@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function SkillsReportTab() {
   const [stats, setStats] = useState<any>(null);
@@ -7,7 +8,7 @@ export default function SkillsReportTab() {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
-    fetch('http://localhost:8000/analytics/report', {
+    fetch(`${API_BASE_URL}/analytics/report`, {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(r => r.json())

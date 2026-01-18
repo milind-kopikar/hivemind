@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/shared/Button';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function UploadPage() {
   const [file, setFile] = useState<File | null>(null);
@@ -31,7 +32,7 @@ export default function UploadPage() {
   const [chapter, setChapter] = useState<number | undefined>(undefined);
 
   React.useEffect(() => {
-    fetch('http://localhost:8000/subjects/')
+    fetch(`${API_BASE_URL}/subjects/`)
       .then((r) => r.json())
       .then((data) => setSubjects(data))
       .catch(() => setSubjects([]));
@@ -40,7 +41,7 @@ export default function UploadPage() {
   async function handleAddSubject() {
     if (!newSubject) return;
     const token = localStorage.getItem('token');
-    const res = await fetch('http://localhost:8000/subjects/', {
+    const res = await fetch(`${API_BASE_URL}/subjects/`, {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
@@ -77,7 +78,7 @@ export default function UploadPage() {
       fd.append('file', file);
       fd.append('subject_id', String(subjectId));
       if (chapter) fd.append('chapter', String(chapter));
-      const res = await fetch('http://localhost:8000/ingestion/upload', {
+      const res = await fetch(`${API_BASE_URL}/ingestion/upload`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`

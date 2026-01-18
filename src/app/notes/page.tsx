@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/shared/Input';
 import { Button } from '@/components/shared/Button';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function NotesPage() {
   const [subjects, setSubjects] = useState<Array<{id:number,name:string}>>([]);
@@ -10,7 +11,7 @@ export default function NotesPage() {
   const [error, setError] = useState('');
 
   useEffect(()=>{
-    fetch('http://localhost:8000/subjects/').then(r=>r.json()).then(setSubjects).catch(()=>setSubjects([]));
+    fetch(`${API_BASE_URL}/subjects/`).then(r=>r.json()).then(setSubjects).catch(()=>setSubjects([]));
   },[]);
 
   async function loadNotes() {
@@ -19,7 +20,7 @@ export default function NotesPage() {
     try{
       // Use token for current user
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://localhost:8000/notes/my?subject_id=${subjectId}`, { headers: { Authorization: 'Bearer ' + token } });
+      const res = await fetch(`${API_BASE_URL}/notes/my?subject_id=${subjectId}`, { headers: { Authorization: 'Bearer ' + token } });
       if (!res.ok) {
         const d = await res.json();
         setError(d.detail || 'Failed to load notes');

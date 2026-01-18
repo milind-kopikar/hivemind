@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Input } from '@/components/shared/Input';
 import { Button } from '@/components/shared/Button';
 import Link from 'next/link';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ export default function Register() {
     setError("");
     setSuccess("");
     try {
-      const res = await fetch("http://localhost:8000/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ 

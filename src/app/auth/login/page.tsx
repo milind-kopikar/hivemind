@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { Input } from '@/components/shared/Input';
 import { Button } from '@/components/shared/Button';
 import Link from 'next/link';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -13,7 +14,7 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      const res = await fetch("http://localhost:8000/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),

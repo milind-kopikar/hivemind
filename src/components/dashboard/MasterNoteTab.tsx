@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/shared/Button';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function MasterNoteTab() {
   const [subjects, setSubjects] = useState<any[]>([]);
@@ -15,7 +16,7 @@ export default function MasterNoteTab() {
   const [consensusLoading, setConsensusLoading] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:8000/subjects/')
+    fetch(`${API_BASE_URL}/subjects/`)
       .then(r => r.json())
       .then(setSubjects)
       .catch(() => setSubjects([]));
@@ -23,7 +24,7 @@ export default function MasterNoteTab() {
     // Also fetch the user's most recent master note so we can offer a quick link
     async function loadLatestMaster() {
       try {
-        const res = await fetch('http://localhost:8000/consensus/master/latest', {
+        const res = await fetch(`${API_BASE_URL}/consensus/master/latest`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (!res.ok) return;
@@ -43,7 +44,7 @@ export default function MasterNoteTab() {
     setMasterNote(null);
     try {
       const chapterQuery = chapter !== '' ? `&chapter=${chapter}` : '';
-      const res = await fetch(`http://localhost:8000/notes/all?subject_id=${subjectId}${chapterQuery}`);
+      const res = await fetch(`${API_BASE_URL}/notes/all?subject_id=${subjectId}${chapterQuery}`);
       const data = await res.json();
       setAllNotes(data);
       // Try to fetch existing master note if a chapter is specified
@@ -62,7 +63,7 @@ export default function MasterNoteTab() {
     const ch = overrideChapter ?? chapter;
     if (!sId || ch === '') return;
     try {
-      const res = await fetch(`http://localhost:8000/consensus/master/${sId}/${ch}`, {
+      const res = await fetch(`${API_BASE_URL}/consensus/master/${sId}/${ch}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -84,7 +85,7 @@ export default function MasterNoteTab() {
     if (selectedNoteIds.length === 0) return alert('Please select notes to create consensus.');
     setConsensusLoading(true);
     try {
-      const res = await fetch('http://localhost:8000/consensus/process', {
+      const res = await fetch(`${API_BASE_URL}/consensus/process`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -126,7 +127,7 @@ export default function MasterNoteTab() {
   async function handleDownloadPDF() {
     if (!subjectId || chapter === '') return;
     try {
-      const res = await fetch(`http://localhost:8000/consensus/master/${subjectId}/${chapter}/pdf`, {
+      const res = await fetch(`${API_BASE_URL}/consensus/master/${subjectId}/${chapter}/pdf`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }

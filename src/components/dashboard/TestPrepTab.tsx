@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/shared/Button';
+import { API_BASE_URL } from '@/utils/api';
 
 export default function TestPrepTab() {
   const [messages, setMessages] = useState<Array<{role: 'user' | 'assistant', content: string}>>([]);
@@ -18,7 +19,7 @@ export default function TestPrepTab() {
     }
     async function loadLatestQuiz() {
       try {
-        const res = await fetch('http://localhost:8000/rag/quiz/latest', {
+        const res = await fetch(`${API_BASE_URL}/rag/quiz/latest`, {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
         });
         if (!res.ok) {
@@ -38,7 +39,7 @@ export default function TestPrepTab() {
     async function checkActiveNote() {
       try {
         const token = localStorage.getItem('token');
-        const res = await fetch('http://localhost:8000/consensus/master/latest', {
+        const res = await fetch(`${API_BASE_URL}/consensus/master/latest`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         if (res.ok) {
@@ -62,7 +63,7 @@ export default function TestPrepTab() {
     setLoading(true);
 
     try {
-      const res = await fetch(`http://localhost:8000/rag/tutor`, {
+      const res = await fetch(`${API_BASE_URL}/rag/tutor`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -82,7 +83,7 @@ export default function TestPrepTab() {
       // If we're in quiz mode, try to refresh the active quiz (agent may have just generated one)
       if (mode === 'quiz') {
         try {
-          const qres = await fetch('http://localhost:8000/rag/quiz/latest', {
+          const qres = await fetch(`${API_BASE_URL}/rag/quiz/latest`, {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           });
           if (qres.ok) {
@@ -105,7 +106,7 @@ export default function TestPrepTab() {
     setMessages(prev => [...prev, { role: 'user', content: choice }]);
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:8000/rag/tutor`, {
+      const res = await fetch(`${API_BASE_URL}/rag/tutor`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

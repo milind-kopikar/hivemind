@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { API_BASE_URL } from '@/utils/api';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,7 +15,7 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
       try {
         const token = localStorage.getItem('token');
         if (!token) return;
-        const res = await fetch('http://localhost:8000/auth/me', { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(`${API_BASE_URL}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
         if (!res.ok) return;
         const data = await res.json();
         setPseudo(data.pseudo_name || null);
