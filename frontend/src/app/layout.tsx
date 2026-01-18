@@ -31,52 +31,6 @@ export default function RootLayout({
         <Script id="nav-trap" strategy="beforeInteractive" dangerouslySetInnerHTML={{ __html: `(
           function(){
             try{
-              const traceIfDashboard = (where, url) => {
-                try{
-                  const p = typeof url === 'string' ? new URL(url, location.origin).pathname : (url && url.pathname) || '';
-                  if (p === '/dashboard'){
-                    console.warn('[NavTrap] Blocked early ' + where + ' to /dashboard');
-                    console.trace('[NavTrap] Trace for blocked ' + where + ' to /dashboard');
-                    return true;
-                  }
-                }catch(e){}
-                return false;
-              };
-
-              // history
-              const origPush = history.pushState.bind(history);
-              const origReplace = history.replaceState.bind(history);
-              history.pushState = function(data, title, url){ if (traceIfDashboard('history.pushState', url)) return; return origPush.apply(this, arguments); };
-              history.replaceState = function(data, title, url){ if (traceIfDashboard('history.replaceState', url)) return; return origReplace.apply(this, arguments); };
-
-              // location.assign / replace
-              const origAssign = location.assign.bind(location);
-              const origReplaceLoc = location.replace.bind(location);
-              location.assign = function(url){ if (traceIfDashboard('location.assign', url)) return; return origAssign(url); };
-              location.replace = function(url){ if (traceIfDashboard('location.replace', url)) return; return origReplaceLoc(url); };
-
-              // href setter
-              try{
-                const proto = Object.getPrototypeOf(location);
-                const desc = Object.getOwnPropertyDescriptor(proto, 'href');
-                if (desc && desc.set){
-                  const origHrefSet = desc.set.bind(location);
-                  Object.defineProperty(location, 'href', { set(v){ if (traceIfDashboard('location.href set', v)) return; origHrefSet(v); } });
-                }
-              }catch(e){}
-
-              // intercept link clicks very early
-              document.addEventListener('click', function(e){
-                try{
-                  const a = e.target && e.target.closest ? e.target.closest('a') : null;
-                  if (a && a.href && new URL(a.href, location.origin).pathname === '/dashboard'){
-                    console.warn('[NavTrap] Blocked early click to /dashboard');
-                    console.trace('[NavTrap] Trace for blocked early click to /dashboard');
-                    e.preventDefault(); e.stopPropagation();
-                  }
-                }catch(e){}
-              }, true);
-
               // wrap fetch to log /auth/me responses
               const origFetch = window.fetch.bind(window);
               window.fetch = function(...args){
@@ -87,13 +41,33 @@ export default function RootLayout({
                     if (pathname === '/auth/me'){
                       console.debug('[NavTrap] /auth/me status', res.status, 'url:', res.url);
                       if (res.status === 401){
-                        console.warn('[NavTrap] /auth/me returned 401');
+                        console.warn('[NavTrap] /auth/me returned 401 - ABORTING NAVIGATION NEXT');
                         console.trace('[NavTrap] Trace for /auth/me -> 401');
+                        // Set a global flag to block the next few seconds of navigation?
+                        window.__blockNavUntil = Date.now() + 2000;
                       }
                     }
                   }catch(e){}
                 }).catch(()=>{});
                 return p;
+              };
+
+              // Update traceIfDashboard to allow block via flag
+              const traceIfDashboard = (where, url) => {
+                try{
+                  const p = typeof url === 'string' ? new URL(url, location.origin).pathname : (url && url.pathname) || '';
+                  if (p === '/dashboard'){
+                    if (window.__blockNavUntil && Date.now() < window.__blockNavUntil) {
+                       console.warn('[NavTrap] Hard blocked ' + where + ' to /dashboard due to recent 401');
+                       console.trace('[NavTrap] Trace for hard blocked ' + where + ' to /dashboard');
+                       return true;
+                    }
+                    console.warn('[NavTrap] Blocked early ' + where + ' to /dashboard');
+                    console.trace('[NavTrap] Trace for blocked ' + where + ' to /dashboard');
+                    return true;
+                  }
+                }catch(e){}
+                return false;
               };
             }catch(e){ console.error('[NavTrap] init error', e); }
           }
