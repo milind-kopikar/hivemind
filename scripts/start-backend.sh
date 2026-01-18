@@ -6,14 +6,27 @@ cd "$(dirname "$0")/.."
 
 echo "Starting HiveMind backend (shell script)"
 
+# Detect python executable (prefer python3)
+if command -v python3 >/dev/null 2>&1; then
+  PY_CMD=python3
+elif command -v python >/dev/null 2>&1; then
+  PY_CMD=python
+else
+  echo "Error: no python interpreter found (python3 or python)." >&2
+  exit 1
+fi
+
 if [ ! -d .venv ]; then
-  echo "Creating virtual environment .venv..."
-  python3 -m venv .venv
+  echo "Creating virtual environment .venv using $PY_CMD..."
+  $PY_CMD -m venv .venv
 fi
 
 PYTHON=.venv/bin/python
 $PYTHON -m pip install --upgrade pip setuptools wheel
 $PYTHON -m pip install -r backend/requirements.txt
 
-echo "Running uvicorn backend.app.main:app on http://0.0.0.0:8000"
-$PYTHON -m uvicorn backend.app.main:app --reload --host 0.0.0.0 --port 8000
+# Use Railway provided PORT if available, default to 8000
+PORT=${PORT:-8000}
+
+echo "Running uvicorn backend.app.main:app on http://0.0.0.0:$PORT"
+$PYTHON -m uvicorn backend.app.main:app --host 0.0.0.0 --port "$PORT"
