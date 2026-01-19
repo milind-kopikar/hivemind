@@ -1,21 +1,23 @@
-"use client";
-import React, { useEffect } from 'react';
-import { Layout } from '@/components/shared/Layout';
-import { Button } from '@/components/shared/Button';
-import Image from 'next/image';
-import Link from 'next/link';
+﻿"use client";
+import React, { useEffect, useState } from "react";
+import { Layout } from "@/components/shared/Layout";
+import { Button } from "@/components/shared/Button";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem("token");
     if (token) {
-      window.location.href = "/dashboard";
+      setIsLoggedIn(true);
     }
   }, []);
 
   return (
-    <div className="min-h-screen bg-white text-gray-900">
-      <main className="max-w-4xl mx-auto px-6 py-16 flex flex-col items-center text-center">
+    <Layout>
+      <div className="flex flex-col items-center text-center py-12">
         {/* Logo */}
         <div className="mb-8">
           <Image 
@@ -51,7 +53,7 @@ export default function Home() {
           <div className="p-6 border border-gray-100 rounded-2xl bg-gray-50">
             <h3 className="text-lg font-bold mb-2">Institutional Memory</h3>
             <p className="text-gray-600">
-              Access previous years' notes and insights. Track how concepts evolve 
+              Access previous years\' notes and insights. Track how concepts evolve 
               under different teachers and semesters.
             </p>
           </div>
@@ -59,22 +61,28 @@ export default function Home() {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-          <Link href="/auth/login" className="flex-1">
-            <Button fullWidth variant="primary" className="py-4 text-lg">
-              Sign In
-            </Button>
-          </Link>
-          <Link href="/auth/register" className="flex-1">
-            <Button fullWidth variant="outline" className="py-4 text-lg">
-              Register
-            </Button>
-          </Link>
+          {!isLoggedIn ? (
+            <>
+              <Link href="/auth/login" className="flex-1">
+                <Button fullWidth variant="primary" className="py-4 text-lg">
+                  Sign In
+                </Button>
+              </Link>
+              <Link href="/auth/register" className="flex-1">
+                <Button fullWidth variant="outline" className="py-4 text-lg">
+                  Register
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <Link href="/dashboard" className="w-full" onClick={() => { (window as any).__allowNavigateToDashboard = true; }}>
+              <Button fullWidth variant="primary" className="py-4 text-lg">
+                Go to Dashboard
+              </Button>
+            </Link>
+          )}
         </div>
-
-        <footer className="mt-20 text-sm text-gray-400">
-          &copy; 2026 HiveMind. Built for students, by the collective.
-        </footer>
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 }
